@@ -76,9 +76,12 @@ get_server_value() {
             local k v
             k="${line%%=*}"
             v="${line#*=}"
-            k="${k// /}"  # trim spaces
+            k="${k// /}"        # trim spaces
+            k="${k//$'\r'/}"    # strip carriage returns
+            v="${v//$'\r'/}"    # strip carriage returns
             if [ "$k" = "$key" ]; then
                 value="$(_strip_quotes "$v")"
+                value="${value//$'\r'/}"
                 break
             fi
         fi
@@ -153,9 +156,16 @@ list_enabled_servers() {
     local all_servers
     all_servers="$(list_servers)" || return 1
 
+    if [ -z "$all_servers" ]; then
+        log_debug "list_enabled_servers: no servers found in servers.conf"
+        return 0
+    fi
+
     while IFS= read -r srv; do
+        [ -z "$srv" ] && continue
         local enabled
         enabled="$(get_server_value "$srv" "enabled")"
+        log_debug "list_enabled_servers: server='$srv' enabled='$enabled'"
         if [ "$enabled" = "true" ]; then
             echo "$srv"
         fi
