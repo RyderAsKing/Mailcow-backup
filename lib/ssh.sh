@@ -23,7 +23,7 @@ _ssh_base_opts() {
 # ---------------------------------------------------------------------------
 _ssh_prefix() {
     if [ "$SERVER_SSH_AUTH_METHOD" = "password" ]; then
-        echo -n "sshpass -p ${SERVER_SSH_PASS} "
+        echo -n "sshpass -p '${SERVER_SSH_PASS}' "
     fi
 }
 
