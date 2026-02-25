@@ -63,8 +63,11 @@ get_server_value() {
         [[ -z "${line// }" ]] && continue
 
         # Section header
-        if [[ "$line" =~ ^\[([^\]]+)\]$ ]]; then
-            if [ "${BASH_REMATCH[1]}" = "$server" ]; then
+        local stripped_line="${line//$'\r'/}"
+        if [[ "$stripped_line" =~ ^[[:space:]]*\[([^\]]+)\][[:space:]]*$ ]]; then
+            local section_name="${BASH_REMATCH[1]}"
+            section_name="${section_name//$'\r'/}"
+            if [ "$section_name" = "$server" ]; then
                 in_section=1
             else
                 in_section=0
@@ -145,7 +148,10 @@ list_servers() {
         log_error "Servers config not found: $SERVERS_CONFIG"
         return 1
     fi
-    grep -E '^\[[^\]]+\]$' "$SERVERS_CONFIG" | tr -d '[]'
+    # Use grep -oP to extract section names; also strip any carriage returns
+    grep -E '^\s*\[[^\]]+\]' "$SERVERS_CONFIG" \
+        | sed 's/^[[:space:]]*\[//;s/\][[:space:]]*//' \
+        | tr -d '\r'
 }
 
 # ---------------------------------------------------------------------------
@@ -157,7 +163,8 @@ list_enabled_servers() {
     all_servers="$(list_servers)" || return 1
 
     if [ -z "$all_servers" ]; then
-        log_debug "list_enabled_servers: no servers found in servers.conf"
+        log_warn "No server sections found in $SERVERS_CONFIG"
+        log_warn "Ensure sections are formatted as [server-name] on their own line."
         return 0
     fi
 
