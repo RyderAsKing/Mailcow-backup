@@ -1,0 +1,18 @@
+# Backup data (keep directory structure via .gitkeep)
+backups/*
+!backups/.gitkeep
+
+# Logs (keep directory)
+logs/*
+!logs/.gitkeep
+
+# Server configs with credentials – never commit these
+config/servers.conf
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
