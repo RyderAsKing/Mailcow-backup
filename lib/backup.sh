@@ -112,7 +112,7 @@ backup_find_latest_remote_dir() {
     log_step "Locating latest backup directory on remote..."
 
     ssh_run_with_output \
-        "ls -1dt '${SERVER_REMOTE_BACKUP_PATH}'/mailcow_* 2>/dev/null | head -1" || {
+        "ls -1dt '${SERVER_REMOTE_BACKUP_PATH}'/mailcow-* 2>/dev/null | head -1" || {
         log_error "Failed to list remote backup directories."
         return 1
     }
@@ -157,7 +157,7 @@ backup_download() {
 backup_cleanup_remote() {
     log_step "Cleaning up remote backup directories..."
 
-    ssh_run "rm -rf '${SERVER_REMOTE_BACKUP_PATH}'/mailcow_*" || {
+    ssh_run "rm -rf '${SERVER_REMOTE_BACKUP_PATH}'/mailcow-*" || {
         log_warn "Could not clean up remote backup path: ${SERVER_REMOTE_BACKUP_PATH}"
         return 0   # non-fatal
     }
