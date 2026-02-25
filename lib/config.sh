@@ -22,6 +22,10 @@ load_main_config() {
 
     # Apply defaults
     BACKUP_ROOT="${BACKUP_ROOT:-${SCRIPT_DIR}/backups}"
+    # Resolve relative BACKUP_ROOT paths relative to SCRIPT_DIR, not CWD
+    if [[ "$BACKUP_ROOT" != /* ]]; then
+        BACKUP_ROOT="${SCRIPT_DIR}/${BACKUP_ROOT}"
+    fi
     RETENTION_COUNT="${RETENTION_COUNT:-7}"
     SSH_TIMEOUT="${SSH_TIMEOUT:-30}"
     REMOTE_BACKUP_PATH="${REMOTE_BACKUP_PATH:-/tmp/mailcow_backup}"
@@ -148,10 +152,8 @@ list_servers() {
         log_error "Servers config not found: $SERVERS_CONFIG"
         return 1
     fi
-    # Use grep -oP to extract section names; also strip any carriage returns
-    grep -E '^\s*\[[^\]]+\]' "$SERVERS_CONFIG" \
-        | sed 's/^[[:space:]]*\[//;s/\][[:space:]]*//' \
-        | tr -d '\r'
+    # Use awk to extract section headers; skips comment lines and strips CR
+    awk -F'[][]' '/^[[:space:]]*\[/{gsub(/\r/,""); print $2}' "$SERVERS_CONFIG"
 }
 
 # ---------------------------------------------------------------------------
@@ -227,8 +229,8 @@ create_default_config() {
 # Mailcow Backup - Main Configuration
 # =============================================================================
 
-# Local directory where backups are stored
-BACKUP_ROOT="./backups"
+# Local directory where backups are stored (absolute path recommended)
+BACKUP_ROOT="/root/mailcow-backup/backups"
 
 # Default number of backups to keep per server (can be overridden per server)
 RETENTION_COUNT=7
