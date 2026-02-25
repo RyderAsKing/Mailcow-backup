@@ -10,8 +10,8 @@ _ssh_base_opts() {
     echo -n "-p ${SERVER_SSH_PORT} "
     echo -n "-o ConnectTimeout=${SSH_TIMEOUT} "
     echo -n "-o StrictHostKeyChecking=accept-new "
-    echo -n "-o BatchMode=yes "
     if [ "$SERVER_SSH_AUTH_METHOD" = "key" ]; then
+        echo -n "-o BatchMode=yes "
         echo -n "-i ${SERVER_SSH_KEY} "
         echo -n "-o PasswordAuthentication=no "
     fi
@@ -101,7 +101,7 @@ rsync_download() {
 
     local rsync_prefix=""
     if [ "$SERVER_SSH_AUTH_METHOD" = "password" ]; then
-        rsync_prefix="sshpass -p ${SERVER_SSH_PASS} "
+        rsync_prefix="sshpass -p '${SERVER_SSH_PASS}' "
     fi
 
     mkdir -p "$local_path"
